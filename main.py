@@ -103,13 +103,11 @@ def request_identif_type(chat_id, type_request):
         person = ChatData[chat_id]['userData']['type_person']
         buttonsForType = getListButtonsForType(ALLNAMEBUTTON_PROBLEMS, person)
         createBotton(chat_id, 'С чем возникла проблема?', buttonsForType)
+    elif type_request == 'задать вопрос':
+        write_msg(chat_id, 'Напишите ваш вопрос')
+    elif type_request == 'оставить отзыв':
+        write_msg(chat_id, 'Пожалуйста, оставьте ваш отзыв ниже)')
 
-    # elif type_request == 'задать вопрос':
-    #     mesg = bot.send_message(chat_id, f'Напишите ваш вопрос', parse_mode='HTML')
-    #     bot.register_next_step_handler(mesg, get_text_art) #TODO как дожидаться сообщения пользователя?
-    # elif type_request == 'оставить отзыв':
-    #     mesg = bot.send_message(chat_id, f'Пожалуйста, оставьте ваш отзыв ниже)', parse_mode='HTML')
-    #     bot.register_next_step_handler(mesg, get_text_art)
 
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW:
@@ -118,8 +116,6 @@ for event in longpoll.listen():
             print('New message:')
             print(f'For me by: {event.user_id}')
 
-            # bot = VkBot(event.user_id)
-            # write_msg(event.user_id, bot.new_message(event.text))
             id = event.user_id
 
             user_get = session_api.users.get(user_ids=(id))
@@ -127,8 +123,6 @@ for event in longpoll.listen():
             CreateStart_ChatData(id, user_get['first_name'] + ' ' + user_get['last_name'])
             print(ChatData[id])
 
-            # if message == "Hi":
-            #     write_msg(id, "Фух работает")
             print('Text: ', message)
 
             keyboard = VkKeyboard(inline=False)
@@ -141,3 +135,7 @@ for event in longpoll.listen():
                 person_identif_type(id, message)
             elif message in ['есть проблема', 'задать вопрос', 'оставить отзыв']:  # кнопки типа запроса
                 request_identif_type(id, message)
+            elif message in [problem[0] for problem in ALLNAMEBUTTON_PROBLEMS]:
+                ChatData[id]['requestData']['subtype_request'] = message
+            else:
+                ChatData[id]['requestData']['request_text'] = message
